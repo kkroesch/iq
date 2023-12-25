@@ -9,3 +9,4 @@ https://www.youtube.com/watch?v=f1DYLlATaag&list=PLQY2H8rRoyvzkWIUuM_gs1XClANLlX
 https://sre.google/sre-book/automation-at-google/
 https://blog.chmd.fr/ssh-over-ssl-episode-4-a-haproxy-based-configuration.html
 https://www.harmonica.com/tabs/free-harmonica-tabs-for-dirty-old-town-by-pogues/
+https://www.moosalpregion.ch/angebot/schneeschuhlaufen/
