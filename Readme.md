@@ -27,5 +27,20 @@ curl -X PUT "localhost:9200/webdocuments" -H "Content-Type: application/json" -d
 buildah build -f Containerfile -t iqsearch:latest
 ```
 
+Developemnt server: 
+
+```
+uvicorn iq.server:app --reload
+```
 
 ### Haystack
+
+
+## Export von URLs
+
+Die URLs können aus der Browser-History, z.B. Brave, Chrome, etc. extrahiert werden:
+
+```
+sqlite3 History "SELECT distinct(url) from urls" | awk -F'[?#]' '{split($1, a, "/"); print a[1]"//"a[3]"/"a[4]}' | uniq > history.txt
+```
+

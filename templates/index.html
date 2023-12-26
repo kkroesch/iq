@@ -44,7 +44,11 @@
             <div class="card-body">
                 <h5 class="card-title">{{ hit._source.title }}</h5>
                 <p class="card-text">
-                    {{ hit.highlight.paragraphs[0] | safe }}
+                    {% if highlight in hit %}
+                        {{ hit.highlight.paragraphs[0] | safe }}
+                    {% else %}
+                    <i class="fa-solid fa-clipboard-question"></i> <span class="text-muted">Kein Absatz mit Schlüsselwort gefunden.</span>
+                    {% endif %}
                 </p>
                 <i class="fa-solid fa-link text-muted"></i> <a href="{{ hit._source.url }}" class="site">{{
                     hit._source.url }}</a>
