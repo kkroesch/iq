@@ -13,29 +13,18 @@
 <body>
     {% include 'nav.html' %}
 
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6 offset-md-6"><span class="logo text-muted">iQ</span>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6 offset-md-3">
-                <div class="search-box">
-                    <form method="GET" action="/q">
-                        <input type="text" class="form-control" placeholder="Suchbegriff" name="query"
-                            value="{{ query }}">
-                        <span class="search-icon">
-                            <i class="fa fa-search"></i>
-                        </span>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
     {% if query %}
     <div class="container results">
-        <h3 class="results-section">Ergebnisse</h3>
+        <div class="search-box">
+            <form method="GET" action="/q">
+                <input type="text" class="form-control" placeholder="Suchbegriff" name="query"
+                    value="{{ query }}">
+                <span class="search-icon">
+                    <i class="fa fa-search"></i>
+                </span>
+            </form>
+        </div>
+    
         <p class="text-end small text-muted">{{ hits.total.value }} {{ hits.total.value | pluralize("Ergebnis",
             "Ergebnisse") }} in {{ es_time }}ms</p>
 
@@ -44,10 +33,8 @@
             <div class="card-body">
                 <h5 class="card-title">{{ hit._source.title }}</h5>
                 <p class="card-text">
-                    {% if highlight in hit %}
+                    {% if hit.highlight %}
                         {{ hit.highlight.paragraphs[0] | safe }}
-                    {% else %}
-                    <i class="fa-solid fa-clipboard-question"></i> <span class="text-muted">Kein Absatz mit Schlüsselwort gefunden.</span>
                     {% endif %}
                 </p>
                 <i class="fa-solid fa-link text-muted"></i> <a href="{{ hit._source.url }}" class="site">{{
@@ -72,43 +59,14 @@
         </div>
         {% endfor %}
     </div>
+    {% else %}
+    {% include 'searchbox.html' %}
     {% endif %}
 
     <!-- SCRIPTS -->
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-    // Preview-Button Popover
-    document.addEventListener('DOMContentLoaded', function () {
-        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-            return new bootstrap.Popover(popoverTriggerEl, {
-                trigger: 'click',
-                html: true,
-                title: 'Zusätzliche Informationen',
-                content: 'Lade...'
-            });
-        });
-
-        popoverTriggerList.forEach(function (popoverTriggerEl) {
-            popoverTriggerEl.addEventListener('shown.bs.popover', function () {
-                var docId = this.getAttribute('data-doc-id');
-                fetch('/preview/' + docId)
-                    .then(response => response.json())
-                    .then(data => {
-                        var popover = bootstrap.Popover.getInstance(this);
-                        popover.setContent({
-                            '.popover-body': 'Geladene Daten: ' + JSON.stringify(data)
-                        });
-                        popover.update();
-                    })
-                    .catch(error => {
-                        console.error('Fehler beim Laden der Daten: ', error);
-                    });
-            });
-        });
-    });
-    </script>
+    <script src="/assets/preview.js"></script>
 </body>
 
 </html>

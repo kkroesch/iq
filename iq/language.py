@@ -6,8 +6,7 @@ import arrow
 
 def humanize(date):
     then = arrow.get(date)
-    now = arrow.now()
-    return then.humanize(then, locale='de')
+    return then.humanize(locale='de')
 
 
 def pluralize(count, singular, plural=None):

@@ -26,6 +26,7 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 from elasticsearch import Elasticsearch
+import sqlite3
 
 #
 # CONFIG
@@ -63,11 +64,37 @@ def scrape_and_store(url, es_client):
             'last_seen': datetime.now().isoformat()
         }
 
-        es_client.index(index='webdocuments', body=data)
-        print(f"Daten erfolgreich für {url} gespeichert")
-
+        response = es_client.index(index='webdocuments', body=data)
+        return response
+    
     except Exception as e:
         print(f"Fehler beim Scrapen von {url}: {e}")
+
+
+def add_url(url, conn):
+    """ Write URLs into database. """
+    cursor = conn.cursor()
+    cursor.execute(f"""
+        INSERT INTO websites 
+            (url)
+        VALUES
+            ('{url}')
+        ON CONFLICT (url)
+        DO UPDATE SET last_visited = strftime('%s', 'now');
+        """)
+    conn.commit()
+
+
+def indexed_url(url, search_id, conn):
+    """ Store information for URL. """
+    cursor = conn.cursor()
+    cursor.execute(f"""
+        UPDATE websites
+            (url, search_id, last_visited, last_indexed)
+        VALUES
+            ('{url}', '{search_id}', strftime('%s', 'now'), strftime('%s', 'now'))
+        """)
+    conn.commit()
 
 
 def main():
@@ -81,17 +108,18 @@ def main():
         ssl_show_warn = False,
     )
 
-    # Überprüfen Sie die Verbindung
     if es.ping():
         print("Erfolgreich mit Elasticsearch verbunden!")
     else:
         print("Verbindung zu Elasticsearch fehlgeschlagen.")
 
-    # URLs aus der Datei 'bookmarks.txt' lesen und verarbeiten
-    with open('test/fixtures/bookmarks.txt', 'r') as file:
-        for line in file:
-            url = line.strip()
-            scrape_and_store(url, es)
+    conn = sqlite3.connect('db/websites.db')
+    cursor = conn.cursor()
+    cursor.execute(""" SELECT url FROM websites """)
+    for row in cursor:
+        url = row[0]
+        id = scrape_and_store(url, es)
+        indexed_url(url, id, conn)
 
 
 if __name__ == "__main__":
