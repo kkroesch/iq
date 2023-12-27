@@ -78,12 +78,12 @@ def scrape_and_store(url, es_client):
 def indexed_url(url, search_id, conn):
     """ Store information for URL. """
     cursor = conn.cursor()
-    cursor.execute(f"""
+    cursor.execute("""
         UPDATE websites
             (url, search_id, last_visited, last_indexed)
         VALUES
-            ('{url}', '{search_id}', strftime('%s', 'now'), strftime('%s', 'now'))
-        """)
+            (?, ?, strftime('%s', 'now'), strftime('%s', 'now'))
+        """, (url, id))
     conn.commit()
 
 

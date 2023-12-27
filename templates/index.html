@@ -17,16 +17,33 @@
     <div class="container results">
         <div class="search-box">
             <form method="GET" action="/q">
-                <input type="text" class="form-control" placeholder="Suchbegriff" name="query"
-                    value="{{ query }}">
+                <input type="text" class="form-control" placeholder="Suchbegriff" name="query" value="{{ query }}">
                 <span class="search-icon">
                     <i class="fa fa-search"></i>
                 </span>
             </form>
         </div>
-    
+
         <p class="text-end small text-muted">{{ hits.total.value }} {{ hits.total.value | pluralize("Ergebnis",
             "Ergebnisse") }} in {{ es_time }}ms</p>
+
+        <form action="/analyze" method="POST">
+            <div class="form-group">
+                <button id="toggleAnalyze" type="button" class="btn btn-sm btn-primary"><i
+                        class="fa-solid fa-magnifying-glass-chart"></i> Analyze</button>
+            </div>
+            <div class="form-group" id="analyzePrompt" style="display: none;">
+                <textarea class="form-control" rows="3">
+                    Given the documents from the result, answer the question.
+                    ---
+                    ## Question
+                    Welche der genannten Veranstaltungen findet in der Schweiz statt?
+                    ---
+                    ## Answer
+                </textarea>
+                <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+            </div>
+        </form>
 
         {% for hit in hits.hits %}
         <div class="card">
@@ -34,7 +51,7 @@
                 <h5 class="card-title">{{ hit._source.title }}</h5>
                 <p class="card-text">
                     {% if hit.highlight %}
-                        {{ hit.highlight.paragraphs[0] | safe }}
+                    {{ hit.highlight.paragraphs[0] | safe }}
                     {% endif %}
                 </p>
                 <i class="fa-solid fa-link text-muted"></i> <a href="{{ hit._source.url }}" class="site">{{
@@ -46,7 +63,8 @@
                     <li data-bs-toggle="popover" data-doc-id="{{ hit._id }}">
                         <i class="fa-regular fa-eye" title="Klick für eine Vorschau"></i> Vorschau
                     </li>
-                    <li><i class="fa-regular fa-clock" title="Zuletzt indexiert."></i> {{ hit._source.last_seen | humanize }}</li>
+                    <li><i class="fa-regular fa-clock" title="Zuletzt indexiert."></i> {{ hit._source.last_seen |
+                        humanize }}</li>
                 </ul>
             </div>
         </div>
@@ -67,6 +85,13 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/preview.js"></script>
+    <script>
+        document.getElementById('toggleAnalyze').addEventListener('click', function () {
+            var textareaDiv = document.getElementById('analyzePrompt');
+            textareaDiv.style.display = 'block';
+            textareaDiv.classList.add('fade-in');
+        });
+    </script>
 </body>
 
 </html>
