@@ -28,6 +28,8 @@ from bs4 import BeautifulSoup
 from elasticsearch import Elasticsearch
 import sqlite3
 
+from console import success, warn, info, error
+
 #
 # CONFIG
 #
@@ -58,6 +60,8 @@ def scrape_and_store(url, es_client):
 
         data = {
             'title': soup.title.string if soup.title else 'Kein Titel',
+            #'description': soup.find("meta", {"name": "description"})["content"],
+            #'keywords': soup.find("meta", {"name": "keywords"})["content"],
             'headings': [h.text for h in soup.find_all(['h1', 'h2', 'h3'])],
             'paragraphs': [p.text for p in soup.find_all('p')],
             'url': url,
@@ -68,21 +72,7 @@ def scrape_and_store(url, es_client):
         return response
     
     except Exception as e:
-        print(f"Fehler beim Scrapen von {url}: {e}")
-
-
-def add_url(url, conn):
-    """ Write URLs into database. """
-    cursor = conn.cursor()
-    cursor.execute(f"""
-        INSERT INTO websites 
-            (url)
-        VALUES
-            ('{url}')
-        ON CONFLICT (url)
-        DO UPDATE SET last_visited = strftime('%s', 'now');
-        """)
-    conn.commit()
+        error(f"Fehler beim Scrapen von {url}: {e}")
 
 
 def indexed_url(url, search_id, conn):
@@ -109,17 +99,17 @@ def main():
     )
 
     if es.ping():
-        print("Erfolgreich mit Elasticsearch verbunden!")
+        success("Erfolgreich mit Elasticsearch verbunden!")
     else:
-        print("Verbindung zu Elasticsearch fehlgeschlagen.")
+        error("Verbindung zu Elasticsearch fehlgeschlagen.")
 
     conn = sqlite3.connect('db/websites.db')
     cursor = conn.cursor()
     cursor.execute(""" SELECT url FROM websites """)
     for row in cursor:
         url = row[0]
-        id = scrape_and_store(url, es)
-        indexed_url(url, id, conn)
+        response = scrape_and_store(url, es)
+        indexed_url(url, response.get('_id'), conn)
 
 
 if __name__ == "__main__":
