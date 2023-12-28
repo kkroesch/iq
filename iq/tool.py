@@ -29,9 +29,8 @@ Lizenz: MIT
 from datetime import datetime
 import sqlite3
 
-from console import success, warn, info, error
+from console import console, success, warn, info, error
 from rich.table import Table
-from rich.console import Console
 
 
 #
@@ -111,7 +110,6 @@ def main():
     args = parser.parse_args()
 
     conn = sqlite3.connect(os.getenv('DB_FILE', 'db/websites.db'))
-    console = Console()
     
     if hasattr(args, 'func'):
         args.func(args, conn, console)

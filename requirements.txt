@@ -9,10 +9,14 @@ beautifulsoup4==4.12.2
 boilerpy3==1.0.7
 certifi==2023.11.17
 charset-normalizer==3.3.2
+distro==1.9.0
 elasticsearch==7.9.0
 fastapi==0.108.0
 frozenlist==1.4.1
+h11==0.14.0
 haystack-ai==2.0.0b3
+httpcore==1.0.2
+httpx==0.26.0
 idna==3.6
 Jinja2==3.1.2
 lazy-imports==0.3.1
