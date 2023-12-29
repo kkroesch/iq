@@ -4,9 +4,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, FileSystemLoader
 
-
-from iq import es
 from iq.language import pluralize, decimal, humanize
+from iq import es
 
 app = FastAPI()
 env = Environment(loader=FileSystemLoader('templates'))
