@@ -64,7 +64,7 @@ def list_websites(args, conn, console):
 #
 # ACTIONS
 #
-    
+
 class FooAction(argparse.Action):
     """ Example action """
     def __init__(self, option_strings, dest, nargs=None, **kwargs):
@@ -75,6 +75,15 @@ class FooAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         print('%r %r %r' % (namespace, values, option_string))
         setattr(namespace, self.dest, values)
+
+#
+# MISC
+#
+
+class AttributeDict(dict):
+    __getattr__ = dict.__getitem__
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
 
 
 #
