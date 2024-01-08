@@ -21,8 +21,10 @@ Lizenz: MIT
 # IMPORTS
 #
 
+import atexit
 from datetime import datetime
 import sqlite3
+from bs4 import BeautifulSoup as bs4
 
 from console import console, success, warn, info, error
 from rich.table import Table
@@ -58,11 +60,28 @@ def init_database(args, conn, console):
         cursor.execute(sql)
         sql = "CREATE UNIQUE INDEX unique_url ON websites(url)"
         cursor.execute(sql)
-    except Exception as e:
-        error(e)
-    finally:
-        if conn:
-            conn.close()
+    except Exception as ex:
+        error(ex)
+
+
+def import_bookmarks(args, conn, console):
+    cursor = conn.cursor()
+    with open('import/bookmarks_flat.html', 'r') as file:
+        content = bs4(file.read(), 'html.parser')
+        
+        for link in content.find_all('a'):
+            title = link.text
+            url = link.get('href')
+            add_date = link.get('add_date')
+            info(f"Importing {title}: {add_date}")
+            try:
+                cursor.execute('INSERT INTO websites (title, url, last_visited) VALUES (?, ?, ?)', 
+                (title, url, add_date))
+            except Exception as ex:
+                warn(f"Ignoring {url}: {ex}")
+            finally:
+                conn.commit()
+
 
 def list_websites(args, conn, console):
     """ List all stored bookmarks. """
@@ -85,6 +104,7 @@ def crawl_websites(args, conn, console):
     cursor = conn.cursor()
     cursor.execute(""" SELECT * FROM websites """)
     info(args)
+
 
 #
 # ACTIONS
@@ -141,7 +161,7 @@ def main():
         help='Extrahiert Favoriten aus Github-Favoriten.')
     parser_extract.add_argument('--youtube-channel',
         help='Extrahiert Playlists aus Youtube.')
-    parser_extract.set_defaults(func=crawl_websites)
+    parser_extract.set_defaults(func=import_bookmarks)
 
     parser_scrape = subparsers.add_parser('crawl', 
         help="Besucht Websites und speichert Inhalte in Suchindex.")
@@ -158,6 +178,8 @@ def main():
         args.func(args, conn, console)
     else:
         parser.print_help()
+
+    conn.close()
 
 
 if __name__ == "__main__":
