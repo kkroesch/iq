@@ -1,0 +1,164 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+TOOL_NAME="iq"
+TOOL_VERSION="0.1"
+TOOL_VERBOSE_NAME="iQ Tool to import data and control iQ crawler component."
+
+"""
+Dateiname: iq.py
+Autor: Karsten Kroesch
+
+Beschreibung: 
+Importiert Bookmarks aus Chrome, Brave, Github Stars, Linktr.ee, Youtube in die Crawler-Datenbank
+und steuert den Crawl-Durchlauf.
+
+Lizenz: MIT
+"""
+
+
+#
+# IMPORTS
+#
+
+from datetime import datetime
+import sqlite3
+
+from console import console, success, warn, info, error
+from rich.table import Table
+
+
+#
+# CONFIG
+#
+
+from dotenv import load_dotenv
+import argparse
+import os
+
+
+#
+# FUNCTIONS
+#
+
+def init_database(args, conn, console):
+    try:
+        sql = """
+        CREATE TABLE IF NOT EXISTS websites (
+            id INTEGER PRIMARY KEY,
+            title TEXT NULL,
+            url TEXT NOT NULL,
+            search_id TEXT NULL,
+            last_visited INTEGER NULL,
+            status_code INTEGER NULL,
+            last_indexed INTEGER NULL
+        )
+        """
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        sql = "CREATE UNIQUE INDEX unique_url ON websites(url)"
+        cursor.execute(sql)
+    except Exception as e:
+        error(e)
+    finally:
+        if conn:
+            conn.close()
+
+def list_websites(args, conn, console):
+    """ List all stored bookmarks. """
+    cursor = conn.cursor()
+    cursor.execute(""" SELECT * FROM websites """)
+    
+    table = Table(title="Beispieltabelle")
+    table.add_column("ID", justify="right", style="cyan", no_wrap=True)
+    table.add_column("Title", style="magenta")
+    table.add_column("URL", style="green")
+
+    for row in cursor:
+        table.add_row(str(row[0]), row[1], row[2])
+
+    console.print(table)
+
+
+def crawl_websites(args, conn, console):
+    """ Crawl stored bookmarks. """
+    cursor = conn.cursor()
+    cursor.execute(""" SELECT * FROM websites """)
+    info(args)
+
+#
+# ACTIONS
+#
+
+class CrawlAction(argparse.Action):
+    """ Crawl websites from database. """
+    def __init__(self, conn, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.conn = conn
+    
+    def __call__(self, parser, namespace, values, option_string=None):
+        cursor = self.conn.cursor()
+        cursor.execute(""" SELECT * FROM websites """)
+        for row in cursor:
+            print(f"Crawling {row['url']}")
+
+#
+# MISC
+#
+
+class AttributeDict(dict):
+    __getattr__ = dict.__getitem__
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+
+#
+# MAIN
+#
+
+def main():
+    """ Main method -- pass all initialized connections to function calls. """
+    load_dotenv()
+    conn = sqlite3.connect(os.getenv('DB_FILE', 'db/websites.db'))
+
+    parser = argparse.ArgumentParser(
+        description=TOOL_VERBOSE_NAME,
+        epilog="Copyright 2024 by Karsten Kroesch. MIT License.")
+    parser.add_argument("--version", action="version", version=' '.join((TOOL_NAME, TOOL_VERSION)))
+
+    subparsers = parser.add_subparsers()
+    parser_init = subparsers.add_parser('init',
+        help="Initilisiert Datenbank und Konfiguration.")
+    parser_init.set_defaults(func=init_database)
+
+    parser_extract = subparsers.add_parser('import', 
+        help="Extrahiert aus einer Bookmark-Datei URLs.")
+    parser_extract.add_argument('--filename', 
+        help='Dateiname (default: Bookmarks)')
+    parser_extract.add_argument('-t', '--title', action='store_true', 
+        help='Extrahiert den Titel der Webiste (online).')
+    parser_extract.add_argument('--github-user',
+        help='Extrahiert Favoriten aus Github-Favoriten.')
+    parser_extract.add_argument('--youtube-channel',
+        help='Extrahiert Playlists aus Youtube.')
+    parser_extract.set_defaults(func=crawl_websites)
+
+    parser_scrape = subparsers.add_parser('crawl', 
+        help="Besucht Websites und speichert Inhalte in Suchindex.")
+    parser_scrape.add_argument('--resume', action=CrawlAction, conn=conn, nargs='+',
+        help="Setzt den Vorgang an der zuletzt unterbrochenen Stelle fort.")
+
+    parser_list = subparsers.add_parser('list', aliases=['ls'],
+        help="Listet gespeicherte Websites.")
+    parser_list.set_defaults(func=list_websites)
+
+    args = parser.parse_args()
+    
+    if hasattr(args, 'func'):
+        args.func(args, conn, console)
+    else:
+        parser.print_help()
+
+
+if __name__ == "__main__":
+    main()
