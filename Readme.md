@@ -1,6 +1,5 @@
 # iQ Personal Search Engine
 
-
 ## Installation
 
 ### Opensearch
@@ -20,6 +19,14 @@ curl -X PUT "localhost:9200/webdocuments" -H "Content-Type: application/json" -d
   }
 }' -ku admin:admin
 ```
+
+Or, copy the `*.container` files in `~/.config/containers/systemd`:
+
+```
+systemctl --user daemon-reload
+systemctl --user start opensearch.service
+```
+
 
 ### FastAPI and Python Dependencies
 
@@ -43,4 +50,3 @@ Die URLs können aus der Browser-History, z.B. Brave, Chrome, etc. extrahiert we
 ```
 sqlite3 History "SELECT distinct(url) from urls" | awk -F'[?#]' '{split($1, a, "/"); print a[1]"//"a[3]"/"a[4]}' | uniq > history.txt
 ```
-

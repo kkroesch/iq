@@ -12,9 +12,10 @@ Image=docker.io/opensearchproject/opensearch:2
 # In the container we just run sleep
 Exec=sleep infinity
 
-PublishPort=9200
-PublishPort=9600
+PublishPort=9200:9200
+PublishPort=9600:9600
 Environment="discovery.type=single-node"
+Environment="ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
 
 [Service]
 Restart=always
