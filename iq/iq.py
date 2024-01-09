@@ -51,6 +51,7 @@ def init_database(args, conn, console):
             title TEXT NULL,
             url TEXT NOT NULL,
             search_id TEXT NULL,
+            category TEXT NULL,rm 
             last_visited INTEGER NULL,
             status_code INTEGER NULL,
             last_indexed INTEGER NULL

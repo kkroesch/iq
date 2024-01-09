@@ -1,0 +1,25 @@
+[Unit]
+Description=Opensearch Container Single Node
+
+[Container]
+# See system settings at https://opensearch.org/docs/latest/install-and-configure/install-opensearch/docker/
+Image=docker.io/opensearchproject/opensearch:2
+
+# Use volume and network defined below
+#Volume=opensearch.volume:/data
+#Network=iq.network
+
+# In the container we just run sleep
+Exec=sleep infinity
+
+PublishPort=9200
+PublishPort=9600
+Environment="discovery.type=single-node"
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+
+[Install]
+# Start by default on boot
+WantedBy=multi-user.target default.target

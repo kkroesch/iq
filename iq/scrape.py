@@ -1,22 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-Dateiname: mein_skript.py
-Autor: Dein Name
-
-Beschreibung: 
-Dieses Skript führt [eine bestimmte Aufgabe] aus. Es nutzt [bestimmte Bibliotheken oder Frameworks]
-und ist Teil des Projekts [Projektname]. Dieses Skript demonstriert [spezifische Konzepte oder Techniken].
-Es ist abhängig von [Abhängigkeiten, falls vorhanden] und nutzt Daten von [Datenquellen, falls zutreffend].
-
-Verwendung: 
-Führen Sie das Skript aus der Kommandozeile wie folgt aus: 
-python mein_skript.py [Optionale Argumente]
-
-Lizenz: MIT
-"""
-
 
 #
 # IMPORTS
@@ -26,13 +10,8 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 from elasticsearch import Elasticsearch
+from console import console, success, warn, info, error
 import sqlite3
-
-from console import success, warn, info, error
-
-#
-# CONFIG
-#
 
 from dotenv import load_dotenv
 import os
@@ -60,8 +39,8 @@ def scrape_and_store(url, es_client):
 
         data = {
             'title': soup.title.string if soup.title else 'Kein Titel',
-            #'description': soup.find("meta", {"name": "description"})["content"],
-            #'keywords': soup.find("meta", {"name": "keywords"})["content"],
+            'description': soup.find("meta", {"name": "description"}).get("content", 'N/A'),
+            'keywords': soup.find("meta", {"name": "keywords"}).get("content", 'N/A'),
             'headings': [h.text for h in soup.find_all(['h1', 'h2', 'h3'])],
             'paragraphs': [p.text for p in soup.find_all('p')],
             'url': url,
@@ -82,9 +61,15 @@ def indexed_url(url, search_id, conn):
         UPDATE websites
             (url, search_id, last_visited, last_indexed)
         VALUES
-            (?, ?, strftime('%s', 'now'), strftime('%s', 'now'))
-        """, (url, id))
+            (?, ?, ?, ?)
+        """, (url, search_id, datetime.now(), datetime.now()))
     conn.commit()
+
+
+def categorize(text, model_name="bert-base-uncased"):
+    classifier = pipeline("text-classification", model=model_name)
+    result = classifier(text)
+    return result
 
 
 def main():
