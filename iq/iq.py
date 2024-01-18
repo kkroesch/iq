@@ -74,7 +74,8 @@ def import_bookmarks(args, conn, console):
             title = link.text
             url = link.get('href')
             add_date = link.get('add_date')
-            info(f"Importing {title}: {add_date}")
+            if args.markdown:
+                print(f"  - [{title}]({url})")
             try:
                 cursor.execute('INSERT INTO websites (title, url, last_visited) VALUES (?, ?, ?)', 
                 (title, url, add_date))
@@ -158,6 +159,8 @@ def main():
         help='Dateiname (default: Bookmarks)')
     parser_extract.add_argument('-t', '--title', action='store_true', 
         help='Extrahiert den Titel der Webiste (online).')
+    parser_extract.add_argument('-m', '--markdown', action='store_true', 
+        help='Gibt Bookmarks im Markdown-Format aus.')
     parser_extract.add_argument('--github-user',
         help='Extrahiert Favoriten aus Github-Favoriten.')
     parser_extract.add_argument('--youtube-channel',
