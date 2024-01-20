@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+
+spec:
+  containers:
+  - name: opensearch
+    image: docker.io/opensearchproject/opensearch:2
+    env:
+      - name: discovery.type
+        value: single-node
+      - name: ES_JAVA_OPTS
+        value: -Xms1024m -Xmx1024m
+    ports:
+    - containerPort: 9200
+      hostPort: 9200
+      protocol: TCP
+    - containerPort: 9600
+      hostPort: 9600
+      protocol: TCP
+  - name: iqsearch
+    image: localhost/iqsearch:latest
+    ports:
+    - containerPort: 8000
+      hostPort: 8000
+      protocol: TCP
