@@ -67,7 +67,7 @@ def init_database(args, conn, console):
 
 def import_bookmarks(args, conn, console):
     cursor = conn.cursor()
-    with open('import/bookmarks_flat.html', 'r') as file:
+    with open(args.filename, 'r') as file:
         content = bs4(file.read(), 'html.parser')
         
         for link in content.find_all('a'):
@@ -76,6 +76,7 @@ def import_bookmarks(args, conn, console):
             add_date = link.get('add_date')
             if args.markdown:
                 print(f"  - [{title}]({url})")
+                continue
             try:
                 cursor.execute('INSERT INTO websites (title, url, last_visited) VALUES (?, ?, ?)', 
                 (title, url, add_date))
@@ -155,7 +156,7 @@ def main():
 
     parser_extract = subparsers.add_parser('import', 
         help="Extrahiert aus einer Bookmark-Datei URLs.")
-    parser_extract.add_argument('--filename', 
+    parser_extract.add_argument('-f', '--filename', 
         help='Dateiname (default: Bookmarks)')
     parser_extract.add_argument('-t', '--title', action='store_true', 
         help='Extrahiert den Titel der Webiste (online).')
