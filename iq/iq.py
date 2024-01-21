@@ -21,14 +21,14 @@ Lizenz: MIT
 # IMPORTS
 #
 
-import atexit
 from datetime import datetime
 import sqlite3
 from bs4 import BeautifulSoup as bs4
+from elasticsearch import Elasticsearch
 
 from console import console, success, warn, info, error
 from rich.table import Table
-
+from scrape import scrape_and_store
 
 #
 # CONFIG
@@ -37,6 +37,15 @@ from rich.table import Table
 from dotenv import load_dotenv
 import argparse
 import os
+
+es = Elasticsearch(
+    hosts=[os.getenv('ES_HOST', "https://localhost:9200")],
+    http_auth=(os.getenv('ES_USER', "admin"), os.getenv('ES_PASSWORD', "admin")),
+    use_ssl = True,
+    verify_certs = False,
+    ssl_assert_hostname = False,
+    ssl_show_warn = False,
+)
 
 
 #
@@ -105,8 +114,12 @@ def list_websites(args, conn, console):
 def crawl_websites(args, conn, console):
     """ Crawl stored bookmarks. """
     cursor = conn.cursor()
-    cursor.execute(""" SELECT * FROM websites """)
-    info(args)
+    cursor.execute(""" SELECT url FROM websites """)
+
+    for row in cursor:
+        url = row[0]
+        info(f"Scraping {url}...")
+        scrape_and_store(url, es)
 
 
 #
@@ -172,6 +185,7 @@ def main():
         help="Besucht Websites und speichert Inhalte in Suchindex.")
     parser_scrape.add_argument('--resume', action=CrawlAction, conn=conn, nargs='+',
         help="Setzt den Vorgang an der zuletzt unterbrochenen Stelle fort.")
+    parser_scrape.set_defaults(func=crawl_websites)
 
     parser_list = subparsers.add_parser('list', aliases=['ls'],
         help="Listet gespeicherte Websites.")

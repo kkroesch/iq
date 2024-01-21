@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-
+  name: iqsearch
 spec:
   containers:
   - name: opensearch
@@ -18,7 +18,7 @@ spec:
     - containerPort: 9600
       hostPort: 9600
       protocol: TCP
-  - name: iqsearch
+  - name: searchweb
     image: localhost/iqsearch:latest
     ports:
     - containerPort: 8000

@@ -39,8 +39,8 @@ def scrape_and_store(url, es_client):
 
         data = {
             'title': soup.title.string if soup.title else 'Kein Titel',
-            'description': soup.find("meta", {"name": "description"}).get("content", 'N/A'),
-            'keywords': soup.find("meta", {"name": "keywords"}).get("content", 'N/A'),
+            #'description': soup.find("meta", {"name": "description"}).get("content", 'N/A'),
+            #'keywords': soup.find("meta", {"name": "keywords"}).get("content", 'N/A'),
             'headings': [h.text for h in soup.find_all(['h1', 'h2', 'h3'])],
             'paragraphs': [p.text for p in soup.find_all('p')],
             'url': url,
