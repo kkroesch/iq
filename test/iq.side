@@ -1,0 +1,129 @@
+{
+  "id": "6609960a-de63-4a1e-ac7e-5e4da1eb13a9",
+  "version": "2.0",
+  "name": "iq",
+  "url": "http://localhost:8000",
+  "tests": [{
+    "id": "1b1c5324-08d2-4c0b-a3fc-e59e89897670",
+    "name": "test_iqsearch",
+    "commands": [{
+      "id": "f2b566be-3552-4c6b-84f9-6d5614bdf728",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "1c039f93-4457-4477-9197-03459bacce56",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1536x832",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "e7659fad-6a99-49d6-ae0c-291d66faed25",
+      "comment": "",
+      "command": "click",
+      "target": "name=query",
+      "targets": [
+        ["name=query", "name"],
+        ["css=.form-control", "css:finder"],
+        ["xpath=//input[@name='query']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "e4200f42-b4da-430d-a8ba-fa92f2228449",
+      "comment": "",
+      "command": "type",
+      "target": "name=query",
+      "targets": [
+        ["name=query", "name"],
+        ["css=.form-control", "css:finder"],
+        ["xpath=//input[@name='query']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "pfahlbauten"
+    }, {
+      "id": "e78aabe2-8b84-45eb-9126-f10a84297354",
+      "comment": "",
+      "command": "type",
+      "target": "name=query",
+      "targets": [
+        ["name=query", "name"],
+        ["css=.form-control", "css:finder"],
+        ["xpath=//input[@name='query']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "pfahlbauten"
+    }, {
+      "id": "7835d5fe-c55f-43cb-9ee5-f0d647d5726f",
+      "comment": "",
+      "command": "sendKeys",
+      "target": "name=query",
+      "targets": [
+        ["name=query", "name"],
+        ["css=.form-control", "css:finder"],
+        ["xpath=//input[@name='query']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "${KEY_ENTER}"
+    }, {
+      "id": "fac6a5e0-cf59-42a8-b793-ef06ea63cc8e",
+      "comment": "",
+      "command": "click",
+      "target": "css=html",
+      "targets": [
+        ["css=html", "css:finder"],
+        ["xpath=//html", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "c34528b6-7f97-46cb-8a59-747c1f3ee180",
+      "comment": "",
+      "command": "click",
+      "target": "name=query",
+      "targets": [
+        ["name=query", "name"],
+        ["css=.form-control", "css:finder"],
+        ["xpath=//input[@name='query']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "4dcea56f-2cbf-4db5-9513-94ffcb4b344d",
+      "comment": "",
+      "command": "type",
+      "target": "name=query",
+      "targets": [
+        ["name=query", "name"],
+        ["css=.form-control", "css:finder"],
+        ["xpath=//input[@name='query']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "vmware"
+    }, {
+      "id": "29a97fab-70e2-4926-b17a-ca85b02cbc6d",
+      "comment": "",
+      "command": "sendKeys",
+      "target": "name=query",
+      "targets": [
+        ["name=query", "name"],
+        ["css=.form-control", "css:finder"],
+        ["xpath=//input[@name='query']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "${KEY_ENTER}"
+    }]
+  }],
+  "suites": [{
+    "id": "e510b019-ab78-41cb-9d23-ee9e33574e9a",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["1b1c5324-08d2-4c0b-a3fc-e59e89897670"]
+  }],
+  "urls": ["http://localhost:8000/"],
+  "plugins": []
+}
