@@ -163,3 +163,4 @@ cython_debug/
 
 test/fixtures/Bookmarks
 test/fixtures/History
+iqtool
