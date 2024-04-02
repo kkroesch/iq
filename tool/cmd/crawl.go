@@ -4,9 +4,11 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/spf13/cobra"
@@ -25,32 +27,61 @@ type Website struct {
 }
 
 func crawl(url string) {
-	res, err := http.Get(url)
+	headers := map[string]string{
+		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
+	}
+
+	// HTTP-Request mit benutzerdefinierten Headern
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatalf("Error getting URL %s: %s", url, err)
+		panic(err)
 	}
-	defer res.Body.Close()
-
-	if res.StatusCode != 200 {
-		log.Fatalf("Unhealthy Status: %d %s", res.StatusCode, res.Status)
+	for key, value := range headers {
+		req.Header.Add(key, value)
 	}
 
-	doc, err := goquery.NewDocumentFromReader(res.Body)
+	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("Error loading document:", err)
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode > 400 {
+		panic("Unauthorized / Not found.")
 	}
 
-	doc.Find("head").Find("title, description, keywords").Each(func(i int, s *goquery.Selection) {
-		text := s.Text()
-		fmt.Printf("Metadaten gefunden: %s\n", text)
+	// HTML parsen
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	title := "Kein Titel"
+	if doc.Find("title").Length() > 0 {
+		title = doc.Find("title").Text()
+	}
+
+	var chunks []string
+	doc.Find("h1, h2, h3, article, p, article div").Each(func(i int, s *goquery.Selection) {
+		chunks = append(chunks, s.Text())
 	})
 
-	// Durchlaufe alle <article> und <p>-Tags im <body> und extrahiere den Text
-	doc.Find("body").Find("article, p, article div").Each(func(i int, s *goquery.Selection) {
-		text := s.Text()
-		fmt.Printf("Text gefunden: %s\n", text)
-	})
+	data := map[string]interface{}{
+		"title":     title,
+		"body":      chunks,
+		"url":       url,
+		"last_seen": time.Now().Format(time.RFC3339),
+	}
 
+	// Daten in JSON konvertieren
+	jsonData, err := json.MarshalIndent(data, "", "    ")
+	if err != nil {
+		panic(err)
+	}
+
+	// JSON ausgeben
+	fmt.Println(string(jsonData))
 }
 
 var crawlCmd = &cobra.Command{

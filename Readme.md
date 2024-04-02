@@ -22,6 +22,17 @@ curl -X PUT "localhost:9200/webdocuments" -H "Content-Type: application/json" -d
 }' -ku admin:admin
 ```
 
+### Solr
+
+```bash
+# Start Solr
+podman run -d -v "$PWD/solrdata:/var/solr" -p 8983:8983 docker.io/solr:9.4.1-slim
+# Fix permissions
+chown -R 108982:108982 "$PWD/solrdata"
+# Create Core
+podman exec  -it my_solr solr create_core -c crawler
+```
+
 
 
 ### FastAPI and Python Dependencies
