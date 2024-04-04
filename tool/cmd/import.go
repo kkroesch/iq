@@ -11,13 +11,33 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/spf13/cobra"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 )
 
 var (
 	filePath string
 	dbPath   string
+	connStr  string
+	conn     *sql.DB
 )
+
+func storeUrl(title, url string) bool {
+	// INSERT-Statement vorbereiten
+	query := `
+	INSERT INTO websites (title, url)
+	VALUES ($1, $2)
+	ON CONFLICT (url)
+	DO UPDATE SET last_visited = EXTRACT(EPOCH FROM NOW());
+	`
+	// INSERT-Statement ausführen
+	_, err := conn.Exec(query, title, url)
+	if err != nil {
+		log.Fatal(err)
+		return false
+	} else {
+		return true
+	}
+}
 
 // importCmd represents the import command
 var importCmd = &cobra.Command{
@@ -36,12 +56,6 @@ var importCmd = &cobra.Command{
 			log.Fatal("Error reading HTML:", err)
 		}
 
-		db, err := sql.Open("sqlite3", dbPath)
-		if err != nil {
-			log.Fatal("Error opening database: ", err)
-		}
-		defer db.Close()
-
 		counter := 0
 
 		doc.Find("a").Each(func(i int, s *goquery.Selection) {
@@ -50,26 +64,8 @@ var importCmd = &cobra.Command{
 			if !exists {
 				return
 			}
-
-			stmt, err := db.Prepare(`
-				INSERT INTO websites 
-				(title, url)
-				VALUES
-				(?, ?)
-				ON CONFLICT (url)
-				DO UPDATE SET last_visited = strftime('%s', 'now');
-			`)
-			if err != nil {
-				log.Fatal("Error preparing SQL: ", err)
-			}
-			defer stmt.Close()
-
-			_, err = stmt.Exec(title, url)
-			if err != nil {
-				log.Fatal("DB error: ", err)
-			} else {
-				counter++
-			}
+			storeUrl(title, url)
+			counter++
 		})
 		log.Printf("Imported %d URLs into websites database.\n", counter)
 	},
@@ -79,4 +75,12 @@ func init() {
 	rootCmd.AddCommand(importCmd)
 	importCmd.PersistentFlags().StringVarP(&filePath, "file", "f", "bookmark.html", "Path to your bookmark file.")
 	importCmd.PersistentFlags().StringVarP(&dbPath, "database", "d", "./websites.db", "Path to the websites database.")
+
+	connStr = os.Getenv("POSTGRES_CONNECTION_URL")
+	// "postgres://username:password@host:port/dbname?sslmode=disable"
+	conn, err := sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
 }

@@ -12,7 +12,7 @@ import (
 	"text/tabwriter"
 	"unicode/utf8"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 	"github.com/spf13/cobra"
 )
 
@@ -39,11 +39,14 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		db, err := sql.Open("sqlite3", "../db/websites.db")
+		connStr := os.Getenv("POSTGRES_CONNECTION_URL")
+		// "postgres://username:password@host:port/dbname?sslmode=disable"
+		db, err := sql.Open("postgres", connStr)
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer db.Close()
+
 		rows, sql_err := db.Query("SELECT id, title, url FROM websites")
 		if sql_err != nil {
 			log.Fatal(err)
