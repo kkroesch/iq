@@ -16,7 +16,6 @@ import (
 
 var (
 	filePath string
-	dbPath   string
 	connStr  string
 	conn     *sql.DB
 )
@@ -74,7 +73,7 @@ var importCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(importCmd)
 	importCmd.PersistentFlags().StringVarP(&filePath, "file", "f", "bookmark.html", "Path to your bookmark file.")
-	importCmd.PersistentFlags().StringVarP(&dbPath, "database", "d", "./websites.db", "Path to the websites database.")
+	//importCmd.PersistentFlags().StringVarP(&dbPath, "database", "d", "./websites.db", "Path to the websites database.")
 
 	connStr = os.Getenv("POSTGRES_CONNECTION_URL")
 	// "postgres://username:password@host:port/dbname?sslmode=disable"

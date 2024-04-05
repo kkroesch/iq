@@ -1,7 +1,6 @@
-package main
+package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/vanng822/go-solr/solr"
@@ -16,12 +15,8 @@ type SolrDocument struct {
 }
 
 // Fügt ein Dokument zu Solr hinzu, basierend auf einem JSON-String
-func AddDocumentToSolr(solrURL string, coreName string, jsonDoc string) error {
+func AddDocumentToSolr(solrURL string, coreName string, document SolrDocument) error {
 	// JSON-String in ein SolrDocument-Struct umwandeln
-	var doc SolrDocument
-	if err := json.Unmarshal([]byte(jsonDoc), &doc); err != nil {
-		return fmt.Errorf("error parsing JSON document: %v", err)
-	}
 
 	// Verbindung zum Solr-Server herstellen
 	s, err := solr.NewSolrInterface(solrURL, coreName)
@@ -32,7 +27,7 @@ func AddDocumentToSolr(solrURL string, coreName string, jsonDoc string) error {
 	// Dokument zu Solr hinzufügen
 	update := map[string]interface{}{
 		"add": map[string]interface{}{
-			"doc": doc,
+			"doc": document,
 		},
 	}
 	_, err = s.Update(update, nil)

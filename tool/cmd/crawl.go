@@ -4,8 +4,6 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -67,21 +65,14 @@ func crawl(url string) {
 		chunks = append(chunks, s.Text())
 	})
 
-	data := map[string]interface{}{
-		"title":     title,
-		"body":      chunks,
-		"url":       url,
-		"last_seen": time.Now().Format(time.RFC3339),
+	document := SolrDocument{
+		Title:     title,
+		Body:      chunks,
+		Url:       url,
+		Last_seen: time.Now().Format(time.RFC3339),
 	}
 
-	// Daten in JSON konvertieren
-	jsonData, err := json.MarshalIndent(data, "", "    ")
-	if err != nil {
-		panic(err)
-	}
-
-	// JSON ausgeben
-	fmt.Println(string(jsonData))
+	AddDocumentToSolr("http://localhost:8983/solr", "websites", document)
 }
 
 var crawlCmd = &cobra.Command{
