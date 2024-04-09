@@ -20,27 +20,9 @@
 </head>
 
 <body>
-    {{ template "nav.html" }}
+    {{ template "nav.html" .}}
 
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6 offset-md-6"><span class="logo text-muted">iQ</span>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6 offset-md-3">
-                <div class="search-box">
-                    <form method="GET" action="/q">
-                        <input type="text" class="form-control" placeholder="Suchbegriff" name="query"
-                            value="{{ .Keyword }}">
-                        <span class="search-icon">
-                            <i class="fa fa-search"></i>
-                        </span>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    {{ template "searchbox.html" .}}
 
     <div class="container">
         {{ range .Hits }}
@@ -48,7 +30,7 @@
             <div class="card-body">
                 <h5 class="card-title">{{ .Title }}</h5>
                 <p class="card-text">
-                    {{ .Hilite }}
+                    {{ .Hilite | safe_html }}
                 </p>
                 <i class="fa-solid fa-link text-muted"></i> <a href="{{ .Url }}" class="site">{{ .Url }}</a>
             </div>
@@ -58,7 +40,7 @@
                     <li data-bs-toggle="popover" data-doc-id="{{ . }}">
                         <i class="fa-regular fa-eye" title="Klick für eine Vorschau"></i> Vorschau
                     </li>
-                    <li><i class="fa-regular fa-clock" title="Zuletzt indexiert."></i> {{ .Indexed }}</li>
+                    <li><i class="fa-regular fa-clock" title="Zuletzt indexiert."></i> {{ .Indexed | time_humanize }}</li>
                 </ul>
             </div>
         </div>
