@@ -46,19 +46,19 @@
         {{ range .Hits }}
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">{{ . }}</h5>
+                <h5 class="card-title">{{ .Title }}</h5>
                 <p class="card-text">
-                    {{ . }}
+                    {{ .Hilite }}
                 </p>
-                <i class="fa-solid fa-link text-muted"></i> <a href="{{ . }}" class="site">{{ . }}</a>
+                <i class="fa-solid fa-link text-muted"></i> <a href="{{ .Url }}" class="site">{{ .Url }}</a>
             </div>
             <div class="card-footer text-muted small">
                 <ul>
-                    <li><i class="fa-regular fa-star" title="Treffer-Score"></i> {{ . }}</li>
+                    <li><i class="fa-regular fa-star" title="Treffer-Score"></i> {{ .Score }}</li>
                     <li data-bs-toggle="popover" data-doc-id="{{ . }}">
                         <i class="fa-regular fa-eye" title="Klick für eine Vorschau"></i> Vorschau
                     </li>
-                    <li><i class="fa-regular fa-clock" title="Zuletzt indexiert."></i> {{ . }}</li>
+                    <li><i class="fa-regular fa-clock" title="Zuletzt indexiert."></i> {{ .Indexed }}</li>
                 </ul>
             </div>
         </div>
