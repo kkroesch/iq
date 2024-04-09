@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iQ - Die persönliche Suchmaschine</title>
+    <meta property="og:title" content="iQ - Die persönliche Suchmaschine">
+    <meta property="og:type" content="search engine">
+    <meta property="og:url" content="https://github.com/kkroesch/iq/">
+    <meta property="og:description" content="iQ - Die persönliche Suchmaschine">
+    <meta property="og:image" content="/static/apple-touch-icon.png">
+
+    <link rel="icon" href="/static/favicon.ico">
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="/static/style.css" rel="stylesheet">
+</head>
+
+<body>
+    {{ template "nav.html" }}
+
+    {{ template "searchbox.html" }}
+
+    <ul>
+        {{ range .Hits }}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ . }}</h5>
+                <p class="card-text">
+                    {{ . }}
+                </p>
+                <i class="fa-solid fa-link text-muted"></i> <a href="{{ . }}" class="site">{{ . }}</a>
+            </div>
+            <div class="card-footer text-muted small">
+                <ul>
+                    <li><i class="fa-regular fa-star" title="Treffer-Score"></i> {{ . }}</li>
+                    <li data-bs-toggle="popover" data-doc-id="{{ . }}">
+                        <i class="fa-regular fa-eye" title="Klick für eine Vorschau"></i> Vorschau
+                    </li>
+                    <li><i class="fa-regular fa-clock" title="Zuletzt indexiert."></i> {{ . }}</li>
+                </ul>
+            </div>
+        </div>
+        {{ end }}
+    </ul>
+
+    <!-- SCRIPTS -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/preview.js"></script>
+</body>
+
+</html>
