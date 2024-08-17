@@ -28,6 +28,51 @@ func TruncateString(s string, maxLength int) string {
 	return s
 }
 
+func listSites(cmd *cobra.Command, args []string) {
+	connStr := os.Getenv("POSTGRES_CONNECTION_URL")
+	// "postgres://username:password@host:port/dbname?sslmode=disable"
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	rows, sql_err := db.Query("SELECT id, title, url FROM websites")
+	if sql_err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	writer := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+	// Kopfzeilen
+	fmt.Fprintln(writer, "Id\ttitle\tURL\t")
+	fmt.Fprintln(writer, "----\t-------------------------------------\t------------------------------\t")
+
+	for rows.Next() {
+		var id, url string
+		var title sql.NullString
+		err = rows.Scan(&id, &title, &url)
+		if err != nil {
+			log.Fatal(err)
+		}
+		titleValue := ""
+		if title.Valid {
+			titleValue = title.String
+		}
+		iid, typeErr := strconv.Atoi(id)
+		if typeErr == nil {
+			id = fmt.Sprintf("%4d", iid)
+		}
+		fmt.Fprintf(writer, "%s\t%s\t%s\t\n", id, TruncateString(titleValue, 36), TruncateString(url, 30))
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+	writer.Flush()
+}
+
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
@@ -38,50 +83,7 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		connStr := os.Getenv("POSTGRES_CONNECTION_URL")
-		// "postgres://username:password@host:port/dbname?sslmode=disable"
-		db, err := sql.Open("postgres", connStr)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer db.Close()
-
-		rows, sql_err := db.Query("SELECT id, title, url FROM websites")
-		if sql_err != nil {
-			log.Fatal(err)
-		}
-		defer rows.Close()
-
-		writer := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
-
-		// Kopfzeilen
-		fmt.Fprintln(writer, "Id\ttitle\tURL\t")
-		fmt.Fprintln(writer, "----\t-------------------------------------\t------------------------------\t")
-
-		for rows.Next() {
-			var id, url string
-			var title sql.NullString
-			err = rows.Scan(&id, &title, &url)
-			if err != nil {
-				log.Fatal(err)
-			}
-			titleValue := ""
-			if title.Valid {
-				titleValue = title.String
-			}
-			iid, typeErr := strconv.Atoi(id)
-			if typeErr == nil {
-				id = fmt.Sprintf("%4d", iid)
-			}
-			fmt.Fprintf(writer, "%s\t%s\t%s\t\n", id, TruncateString(titleValue, 36), TruncateString(url, 30))
-		}
-		err = rows.Err()
-		if err != nil {
-			log.Fatal(err)
-		}
-		writer.Flush()
-	},
+	Run: listSites,
 }
 
 func init() {

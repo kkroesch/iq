@@ -13,7 +13,8 @@ import (
 )
 
 var (
-	siteUrl string
+	siteUrl     string
+	synchronize bool
 )
 
 type Website struct {
@@ -75,11 +76,20 @@ func crawl(url string) {
 	AddDocumentToSolr("http://localhost:8983/solr", "websites", document)
 }
 
+func synchronizeWitdhDb() {
+
+}
+
 var crawlCmd = &cobra.Command{
 	Use:   "crawl",
 	Short: "Crawl text from website and index.",
 	Long:  `Crawls a single website (requires --url) or all sites from database and stores the text in index for later search. The status of the visited site is added to the default database.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if synchronize {
+			synchronizeWitdhDb()
+			return
+		}
+
 		if siteUrl == "" {
 			log.Fatal("Empty URL.")
 		} else {
@@ -91,4 +101,5 @@ var crawlCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(crawlCmd)
 	crawlCmd.PersistentFlags().StringVarP(&siteUrl, "url", "u", "", "URL to visit.")
+	crawlCmd.PersistentFlags().BoolVarP(&synchronize, "synchronize", "s", false, "Synchronize with database.")
 }
